@@ -1,26 +1,17 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using Microsoft.Extensions.Options;
+using Platform;
+var builder = WebApplication.CreateBuilder(args); 
 
-app.Use(async (context, next) => 
-{
-    await next(); 
-    await context.Response.
-    WriteAsync($"\nStatus Code: {context.Response.StatusCode}"
-        ); 
-});
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == HttpMethods.Get && context.Request.Query["custom"] == "true")
-    {
-        context.Response.ContentType = "text/plain";
-        await context.Response.WriteAsync("Custom Middleware \n");
-    }
-    await next();
-}
-);
+builder.Services.Configure<MessageOptions>(options => {
+    options.CityName = "Albany"; 
+}); 
+var app = builder.Build(); 
 
-app.UseMiddleware<Platform.QueryStringMiddleWare>();
+app.MapGet("/location", async (HttpContext context, IOptions<MessageOptions> msgOpts) 
+    => { Platform.MessageOptions opts = msgOpts.Value; 
+        await context.Response.WriteAsync($"{opts.CityName}, {opts.CountryName}");
 
-app.MapGet("/", () => "Hello World!");
+}); 
+app.MapGet("/", () => "Hello World!"); 
 
 app.Run();

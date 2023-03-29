@@ -2,43 +2,63 @@
 
 namespace Platform
 {
+
     public class QueryStringMiddleWare
     {
-        private readonly RequestDelegate? next;
+        private RequestDelegate? next;
+
         public QueryStringMiddleWare()
         {
             // do nothing
         }
+
         public QueryStringMiddleWare(RequestDelegate nextDelegate)
         {
             next = nextDelegate;
         }
-        public class LocationMiddleware
+
+        public async Task Invoke(HttpContext context)
         {
-            private RequestDelegate next;
-            private MessageOptions options;
-            public LocationMiddleware(RequestDelegate nextDelegate, IOptions<MessageOptions> opts)
+            if (context.Request.Method == HttpMethods.Get
+                        && context.Request.Query["custom"] == "true")
             {
-                next = nextDelegate;
-                options = opts.Value;
+                if (!context.Response.HasStarted)
+                {
+                    context.Response.ContentType = "text/plain";
+                }
+                await context.Response.WriteAsync("Class-based Middleware \n");
             }
-            public async Task Invoke(HttpContext context)
+            if (next != null)
             {
-                if (context.Request.Path == "/location")
-                {
-                    await context.Response.WriteAsync
-                        ($"{options.CityName}, " +
-                        $"{options.CountryName}"
-                        );
-                }
-                else
-                {
-                    await next(context);
-                }
+                await next(context);
             }
         }
     }
+
+    public class LocationMiddleware
+    {
+        private RequestDelegate next;
+        private MessageOptions options;
+
+        public LocationMiddleware(RequestDelegate nextDelegate,
+                IOptions<MessageOptions> opts)
+        {
+            next = nextDelegate;
+            options = opts.Value;
+        }
+
+        public async Task Invoke(HttpContext context)
+        {
+            if (context.Request.Path == "/location")
+            {
+                await context.Response
+                    .WriteAsync($"{options.CityName}, {options.CountryName}");
+            }
+            else
+            {
+                await next(context);
+            }
+        }
+    }
+
 }
-
-
-

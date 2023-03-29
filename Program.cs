@@ -1,13 +1,12 @@
 using Platform;
-using static Platform.QueryStringMiddleWare;
 
 var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
 
-builder.Services.Configure<MessageOptions>(options => { 
-    options.CityName = "Albany"; 
-}); 
+app.UseMiddleware<Population>();
+app.UseMiddleware<Capital>();
+app.Run(async (context) => {
+    await context.Response.WriteAsync("Terminal Middleware Reached");
+});
 
-var app = builder.Build(); 
-app.UseMiddleware<LocationMiddleware>(); 
-app.MapGet("/", () => "Hello World!"); 
 app.Run();

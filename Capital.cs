@@ -12,7 +12,9 @@
                 case "monaco": context.Response.Redirect($"/population/{country}"); return;
             }
             if (capital != null) { await context.Response.WriteAsync($"{capital} is the capital of {country}"); 
-            } else { 
+            } 
+            else 
+            { 
                 context.Response.StatusCode = StatusCodes.Status404NotFound; 
             }
         }

@@ -2,19 +2,21 @@ using Platform;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
-
-app.MapGet("{first:alpha:length(3)}/{second:bool}", async context => { 
-    await context.Response.WriteAsync("Request Was Routed\n"); 
-    foreach (var kvp in context.Request.RouteValues) { 
-        await context.Response
-            .WriteAsync($"{kvp.Key}: {kvp.Value}\n"); 
-    }
+builder.Services.Configure<RouteOptions>(opts => { 
+    opts.ConstraintMap.Add("countryName", 
+        typeof(CountryRouteConstraint)); 
 });
 
-app.MapGet("capital/{country:regex(^uk|france|monaco$)}", Capital.Endpoint); 
-app.MapGet("size/{city?}", Population.Endpoint).WithMetadata(new RouteNameMetadata("population"));
+var app = builder.Build();
 
-app.MapFallback(async context => { await context.Response.WriteAsync("404 Not Found. Requested URL was not found on this server."); });
+app.MapGet("capital/{country:countryName}", Capital.Endpoint);
+
+app.MapGet("capital/{country:regex(^uk|france|monaco$)}", Capital.Endpoint); 
+app.MapGet("size/{city?}", Population.Endpoint)
+    .WithMetadata(new RouteNameMetadata("population"));
+
+app.MapFallback(async context => { 
+    await context.Response.WriteAsync("404 Not Found. Requested URL was not found on this server."); 
+});
 
 app.Run();

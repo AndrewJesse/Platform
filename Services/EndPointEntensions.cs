@@ -10,12 +10,15 @@ namespace Microsoft.AspNetCore.Builder
             {
                 throw new System.Exception("Method cannot be used"); 
             }
-            T endpointInstance = ActivatorUtilities.CreateInstance<T>(app.ServiceProvider); 
+            T endpointInstance = 
+                ActivatorUtilities.CreateInstance<T>(app.ServiceProvider); 
+
             ParameterInfo[] methodParams = methodInfo!.GetParameters(); 
-            app.MapGet(path, context => (Task)(methodInfo
-            .Invoke(endpointInstance, methodParams
-            .Select(p => p.ParameterType == typeof(HttpContext) ? context : 
-            app.ServiceProvider.GetService(p.ParameterType)).ToArray()))!); 
+
+            app.MapGet(path, context => (Task)(methodInfo.Invoke(endpointInstance, 
+                methodParams.Select(p => p.ParameterType == typeof(HttpContext) 
+                ? context : 
+            context.RequestServices.GetService(p.ParameterType)).ToArray()))!); 
         }
     }
 }

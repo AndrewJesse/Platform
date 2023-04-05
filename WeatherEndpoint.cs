@@ -4,14 +4,23 @@ namespace Platform
 {
     public class WeatherEndpoint
     {
-        private IResponseFormatter formatter;
-        public WeatherEndpoint(IResponseFormatter responseFormatter)
+        private RequestDelegate next;
+        //private IResponseFormatter formatter;
+        public WeatherEndpoint(RequestDelegate nextDelegate, IResponseFormatter respFormatter)
         {
-            formatter = responseFormatter;
+           next = nextDelegate;
+            //formatter = responseFormatter;
         }
-        public static async Task Endpoint(HttpContext context, IResponseFormatter formatter) 
+        public async Task Invoke(HttpContext context, IResponseFormatter formatter) 
         {
-            await formatter.Format(context, "Endpoint Class: It is cloudy in Milan"); 
+            if (context.Request.Path == "/middleware/class") 
+            {
+                await formatter.Format(context, "Middleware Class: It is raining in London"); 
+            }
+            else 
+            {
+                await next(context); 
+            }
         }
     }
 }

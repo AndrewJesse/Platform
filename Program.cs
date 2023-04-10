@@ -12,5 +12,6 @@ builder.Services.AddHttpLogging(opts =>
 });
 var app = builder.Build();
 app.UseHttpLogging();
+app.UseStaticFiles();
 app.MapGet("population/{city?}", Population.Endpoint);
 app.Run();

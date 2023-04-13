@@ -7,6 +7,7 @@ builder.Services.AddSession(opts =>
     opts.Cookie.IsEssential = true;
 });
 var app = builder.Build();
+app.UseHttpsRedirection();
 app.UseSession();
 app.UseMiddleware<Platform.ConsentMiddleware>();
 app.MapGet("/session", async context =>

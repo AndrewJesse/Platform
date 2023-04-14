@@ -2,10 +2,14 @@
 {
     public partial class Population
     {
-        public static async Task Endpoint(HttpContext context, ILogger<Population> logger)
+
+        public static async Task Endpoint(HttpContext context,
+            ILogger<Population> logger)
         {
+            //logger.LogDebug($"Started processing for {context.Request.Path}");
             StartingResponse(logger, context.Request.Path);
-            string city = context.Request.RouteValues["city"] as string ?? "london";
+            string city
+                = context.Request.RouteValues["city"] as string ?? "london";
             int? pop = null;
             switch (city.ToLower())
             {
@@ -19,16 +23,15 @@
                     pop = 39_000;
                     break;
             }
-
             if (pop.HasValue)
             {
-                await context.Response.WriteAsync($"City: {city}, Population: {pop}");
+                await context.Response
+                    .WriteAsync($"City: {city}, Population: {pop}");
             }
             else
             {
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
             }
-
             logger.LogDebug($"Finished processing for {context.Request.Path}");
         }
 
